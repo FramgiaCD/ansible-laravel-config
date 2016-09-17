@@ -1,0 +1,79 @@
+- name: Enable UTF-8
+  locale_gen: name=en_US.UTF-8 state=present
+
+- name: Add Nodesource key
+  apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
+
+- name: Add APT repositories
+  apt_repository: repo={{item}} state=present
+  with_items:
+    - "ppa:brightbox/ruby-ng"
+    - "ppa:ondrej/php"
+    - "deb https://deb.nodesource.com/node_6.x {{ ansible_distribution_release|lower }} main"
+
+- name: Install packages
+  apt: name={{ item }} update_cache=yes state=present
+  with_items:
+    - git
+    - curl
+    - mcrypt
+    - build-essential
+    - nginx
+    - php5.6-cli
+    - php5.6-curl
+    - php5.6-fpm
+    - php5.6-intl
+    - php5.6-json
+    - php5.6-xml
+    - php5.6-mbstring
+    - php5.6-mcrypt
+    - php5.6-zip
+    - php5.6-mysql
+    - php5.6-gd
+    - nodejs
+    - ruby2.2
+    - ruby2.2-dev
+    - ruby-switch
+  notify:
+    - start php-fpm
+    - start nginx
+
+# Force the handler to run in between tasks
+- meta: flush_handlers
+
+- name: Install npm build tool
+  npm: name={{ item }} state=present global=yes
+  become: yes
+  with_items:
+    - npm
+    - n
+    - bower
+    - gulp
+
+- name: Download Composer installer.
+  get_url: url=https://getcomposer.org/installer dest=/tmp/composer-installer.php mode=0755
+
+- name: Run Composer installer.
+  command: >
+    php composer-installer.php
+    chdir=/tmp
+    creates=/usr/local/bin/composer
+
+- name: Move Composer into globally-accessible location
+  shell: >
+    mv /tmp/composer.phar /usr/local/bin/composer
+    creates=/usr/local/bin/composer
+
+- name: Switching the default Ruby version
+  command: ruby-switch --set ruby2.2
+
+- name: Install compass
+  command: gem install compass
+
+# Complete setup database
+- name: Create known host web
+  file: path=/knownhost_web state=touch owner=root group=sys mode=0555
+  register: new_host
+
+# State of current host
+- debug: var=new_host.changed

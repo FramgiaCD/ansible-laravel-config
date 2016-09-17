@@ -1,0 +1,7 @@
+root_dir: "/var/www/laravel"
+repository: "git@github.com:FramgiaDockerTeam/laravel-ssh-source.git"
+branch: "master"
+dbuser: foouser
+dbname: foodb
+dbpassword: "123456Aa@"
+scm_key: "/root/.ssh/id_rsa"

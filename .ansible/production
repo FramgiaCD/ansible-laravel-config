@@ -1,0 +1,9 @@
+[webservers]
+45.32.253.75 ansible_ssh_user=deploy ansible_ssh_port=22 ansible_ssh_private_key_file=/root/.ssh/id_rsa
+
+[dbservers]
+45.32.253.75 ansible_ssh_user=deploy ansible_ssh_port=22 ansible_ssh_private_key_file=/root/.ssh/id_rsa
+
+[all:children]
+webservers
+dbservers

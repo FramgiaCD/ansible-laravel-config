@@ -1,0 +1,4 @@
+# Detect the very first time run task on host
+- name: Check known host web
+  stat: path=/knownhost_web
+  register: knownhost_web

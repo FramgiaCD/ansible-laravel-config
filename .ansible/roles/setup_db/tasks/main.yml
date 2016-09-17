@@ -1,0 +1,64 @@
+- name: Enable UTF-8
+  locale_gen: name=en_US.UTF-8 state=present
+
+- name: Remove the lock proccess file
+  file: path=/var/lib/apt/lists/lock state=absent
+  become: yes
+
+- name: Add MariaDb key
+  apt_key: keyserver=keyserver.ubuntu.com id={{item}}
+  with_items:
+    - "0xcbcb082a1bb943db"
+    - "0xF1656F24C74CD1D8"
+
+- name: Add APT repositories
+  apt_repository: repo={{item}} state=present
+  with_items:
+    - "deb [arch=amd64,i386,ppc64el] http://ftp.yz.yamagata-u.ac.jp/pub/dbms/mariadb/repo/10.1/ubuntu trusty main"
+    - "deb [arch=amd64,i386,ppc64el] http://ftp.yz.yamagata-u.ac.jp/pub/dbms/mariadb/repo/10.1/ubuntu xenial main"
+
+- name: Install packages
+  apt: name={{ item }} update_cache=yes state=present
+  with_items:
+    - git
+    - curl
+    - mcrypt
+    - build-essential
+    - "{{ mysql_engine }}"
+    - python-mysqldb
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Set root user password
+  mysql_user: >
+    name=root
+    password="{{ mysql_root_password }}"
+    check_implicit_admin=yes
+    state=present
+
+- name: Create Mysql configuration file
+  template: src=my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode='0600' force=yes
+  become: yes
+  notify:
+    - restart mysql
+
+# Force the handler to run in between tasks
+- meta: flush_handlers
+
+- name: Create Application Database
+  mysql_db: >
+    name={{ dbname }}
+    collation=utf8_general_ci
+    encoding=utf8
+    state=present
+
+- name: Create Application DB User
+  mysql_user: name={{ dbuser }} password={{ dbpassword }} priv=*.*:ALL host='%' state=present
+
+# Complete setup database
+- name: Create known host database
+  file: path=/knownhost_db state=touch owner=root group=sys mode=0555
+  register: new_host
+
+# State of current host
+- debug: var=new_host.changed
