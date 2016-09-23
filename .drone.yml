@@ -1,5 +1,5 @@
 deploy:
   ansible:
-    image: framgia/ansible-drone
+    image: fdplugins/ansible
     commands:
       - ansible-playbook -i production site.yml --extra-vars='ansible_become_pass=xxx init=yes'
