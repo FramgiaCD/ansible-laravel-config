@@ -11,11 +11,10 @@
     - "0xcbcb082a1bb943db"
     - "0xF1656F24C74CD1D8"
 
-- name: Add APT repositories
+- name: Add MariaDB APT repositories
   apt_repository: repo={{item}} state=present
   with_items:
-    - "deb [arch=amd64,i386,ppc64el] http://ftp.yz.yamagata-u.ac.jp/pub/dbms/mariadb/repo/10.1/ubuntu trusty main"
-    - "deb [arch=amd64,i386,ppc64el] http://ftp.yz.yamagata-u.ac.jp/pub/dbms/mariadb/repo/10.1/ubuntu xenial main"
+    - "deb [arch=amd64,i386,ppc64el] http://ftp.yz.yamagata-u.ac.jp/pub/dbms/mariadb/repo/10.1/ubuntu {{ ansible_distribution_release }} main"
 
 - name: Install packages
   apt: name={{ item }} update_cache=yes state=present
