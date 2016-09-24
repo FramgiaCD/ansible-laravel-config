@@ -1,8 +1,14 @@
 - name: Enable UTF-8
   locale_gen: name=en_US.UTF-8 state=present
 
-- name: Add Nodesource key
+- name: Add nodesource key for Ubuntu 14.04
+  become: yes
+  shell: curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
+  when: ansible_distribution_version == "14.04"
+
+- name: Add nodesource key for Ubuntu 16.04
   apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
+  when: ansible_distribution_version == "16.04"
 
 - name: Add APT repositories
   apt_repository: repo={{item}} state=present

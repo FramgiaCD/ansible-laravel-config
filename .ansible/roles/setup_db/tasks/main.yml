@@ -27,6 +27,8 @@
     - python-mysqldb
   environment:
     DEBIAN_FRONTEND: noninteractive
+  notify:
+    - start mysql
 
 - name: Set root user password
   mysql_user: >
